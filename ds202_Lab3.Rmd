@@ -1,0 +1,174 @@
+---
+title: "ds202_Lab3"
+author: "Mikaela Blount"
+date: "9/26/2019"
+output: html_document
+---
+
+## Outline
+
+- Work in pairs, as in Lab 2
+- Create a repository (one per team) & give access to your teammate
+- Do a data exploration (on happiness)
+- Create an R markdown file that contains all code to read the data and create the plots
+- Submit!
+
+
+## Github repository
+
+- Decide on who is the owner and who is the partner. 
+- The owner should create a GitHub repository called `ds202_lab3`, and give access to the partner.
+- For a refreshment, review the procedures for collaboration for Lab 2. 
+- Collaborate on `team.Rmd` to finish all the questions. 
+
+## Format for submission
+
+- We will check whether or not your lab results are reproducible - i.e. we will knit your `team.Rmd` file. 
+- At this point, you should be pretty familar with using Rmarkdown and explored its various features. Starting from this assignment, you will also be graded on **style**. Style means is your report *clear, easy to read, and flows logically*? Is it obvious that you and your partner have spent time organizing the material in a compelling way that makes it easy (and even enjoyable) for others to read? This `team.Rmd` should be something that you would feel confident turning into a manager/supervisor as proof of your progress. 
+-  <span style="color:red">Each plot at **minimum** must have labels for both axes and a title. If you don't have these components, you will not get full credit for your answers. Each plot ideally should also come with a description. </span> 
+
+## Background
+
+We first start with reading the the happy dataset.
+```{r,eval=FALSE}
+happy <- readRDS("HAPPY.rds")
+```
+
+Now we change the column names to lowercase to make working with the dataset easier.
+```{r,eval=FALSE}
+names(happy) = tolower(names(happy))
+```
+
+
+## Part one (cleaning)
+
+Answer each of the following questions using R code to get an answer. 
+Write a separate code chunk to manipulate each variable. Once all the data manipulation is done, show the values in a barchart or histogram and comment on the plot. Use `ggplot2` to create the plots.
+
+1. Data cleaning: the values "IAP", "DK" and "NA" all encode missing values. Replace all of these instances by the value `NA`. 
+```{r}
+library("stringr")
+library("ggplot2")
+
+happy[happy=="IAP"] <- NA
+happy[happy=="NA"] <- NA
+happy[happy=="DK"] <- NA
+
+head(happy)
+```
+
+
+2. 
+```{r}
+happy$age[happy$age=="89 OR OLDER"] <- 89
+happy$age <- as.numeric(happy$age)
+str(happy$age)
+```
+
+3.
+We chose to arrange marital status by age to see the the trend of martial status throughout life. As age increases, the more likely to see divorce and widow among people.
+```{r}
+library("tidyverse")
+happyMarital = happy %>%
+  group_by(marital) %>% 
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happyMarital
+
+```
+We chose to arrange male and female by average age to see the difference between sex and the rate of filling out the survey. Females averaged slightly older than males indicating that older males were less likely to fill out the survey.
+```{r}
+happySex = happy %>%
+  group_by(sex) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happySex
+```
+We choose to arrange happiness rating by year to see if there is a change by year. Since all three ratings are super close, there is not much change in happiness rating by change in years.
+```{r}
+happyHappy = happy %>%
+  group_by(happy) %>%
+  summarise(avgYear = mean(year,na.rm = TRUE)) %>%
+  arrange(avgYear)
+
+happyHappy
+```
+
+We chose to compare sex by higher education. There are more females than males that pursued higher education than males.
+```{r}
+happyDegree = happy %>%
+  select(sex,degree) %>%
+  group_by(sex) %>%
+  filter(degree %in% c("BACHELOR","GRADUATE","JUNIOR COLLEGE")) %>%
+  summarise(college = length(degree))
+
+
+happyDegree
+```
+We chose to see if having a strong republican polictical has a similar distribution for how they were feeling about their family income. Most republicans feel at or above average about their incomes.
+```{r}
+happyIncome = happy %>%
+  select(finrela,partyid) %>%
+  group_by(finrela) %>%
+  filter(partyid == "STRONG REPUBLICAN") %>%
+  summarise(republicanCount = length(partyid))
+
+
+happyIncome
+```
+We chose to compare health by average age to compare trends. The older the person, the more likely they were to rate their health as worse than younger counterparts.
+```{r}
+happyHealth = happy %>%
+  group_by(health) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happyHealth
+```
+We chose to compare party id and age to see trends. The older the person, the more likely they are to have strong views.
+```{r}
+happyPartyID = happy %>%
+  group_by(partyid) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happyPartyID
+```
+We chose to compare political views for females. Females are less likely to be extreme in polictical views and are most likely to be moderate.
+```{r}
+happyPolViews = happy %>%
+  select(polviews,sex) %>%
+  group_by(polviews) %>%
+  filter(sex == "FEMALE") %>%
+  summarise(polViewsFemale = length(sex)) %>%
+  arrange(polViewsFemale)
+
+
+happyPolViews
+```
+
+## Part two (exploration)
+
+*Happiness!*
+Use `ggplot2` to create the plots. Your exploration should make use all elements of the grammar of graphics: mappings (`color`, `fill`, and `size` at least), different `geom`s (4 at least), scales, coordinates (eg `coord_flip`), facet, and theme (eg setting axis labels and title). **The final plot doesn't need to include all these elements, but they should be part of your exploration**. For each investigation, create an appropriate visualization and write a paragraph to describe it.
+
+1. Investigate the distributions of 2 different variables. 
+2. Investigate the relationship between happiness and three other variables in the data.
+3. What do you learn from the data set? Write one or two paragraphs to describe.
+
+Explore the dataset yourself, and then discuss and refine answers as a team.
+
+## Create a report
+
+Put together everything you've done in Part 1 and 2 into a report (`team.Rmd`). This report should **all** of the questions from Part 1 and 2 and be written in a clear and concise manner. It should **not** be in question and answer format. However you need to address **every** question in order to get full points. **Include R code and graphics when appropriate.** See `Lab3_template.Rmd` for a minimal working example.   
+
+## Submission
+
+1. Push `team.Rmd` and `team.html` to the owner's git repo.
+
+2. **Submit both `team.Rmd` and `team.html` to Canvas as well**. In your submission, include: 
+    - The owner's GitHub username 
+    - The partner's GitHub username 
+    - Repo name (should be `ds202_lab3`)
