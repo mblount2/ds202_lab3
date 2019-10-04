@@ -99,6 +99,7 @@ library(ggplot2)
 ggplot(happy, aes(x=age)) + geom_histogram(binwidth = 5) + ggtitle("Distribution of Age") + xlab("Age")+ ylab("Count") + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
 scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
 ```
+THe distribution of age is skewed to the right.
 
 ```{r}
 ggplot(drop_na(happy), aes(x = happy)) + geom_bar(aes(fill = sex), position = "dodge") + ggtitle("Level of Happiness by Sex") + xlab("Happiness") + ylab("Count")
@@ -111,7 +112,7 @@ ggplot(drop_na(happy), aes(x = happy)) + geom_bar(aes(fill = sex), position = "d
 
 
 ```{r}
-ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = marital), position = 'fill') + ggtitle("Level Happiness by Marital Status") + xlab("Happiness") + ylab("Proportion")
+ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = marital), position = 'fill') + ggtitle("Level of Happiness by Marital Status") + xlab("Happiness") + ylab("Proportion")
 ```
 
 ```{r}
@@ -125,6 +126,8 @@ ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = health), position = '
 
 
 3. What do you learn from the data set? Write one or two paragraphs to describe.
+
+There are several things to learn from this data set. From the graph "Level of Happiness by Marital Status" I can see that there is a correlation between high levels of happiness and married individuals. The proportion of every other marital status declines as happiness increases. In the graph "Level of Happiness by Education" you can see that higher levels of educaton (Graduate and Bachelor) are correlated with higher levels of happiness. Finally the graph "Level of Happiness by Health" shows that the proportion of excellent health increases with levels of happiness; however, the proporiton of good does no share this  correlation.
 
 Explore the dataset yourself, and then discuss and refine answers as a team.
 
