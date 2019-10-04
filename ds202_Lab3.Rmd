@@ -29,22 +29,16 @@ output: html_document
 
 ## Background
 
-The General Social Survey (GSS) has been run by NORC every other year since 1972 to keep track of current opinions across the United States. 
-
-An excerpt of the GSS data is available from my github website. 
-When you `git pull` from my github folder, the file [HAPPY.rds](HAPPY.rds) should have also downloaded. Put the file in the same folder as your working directory. You can check your working directory by typing `getwd()` in your R session. The following command is going to load the data into your R session:
-
+We first start with reading the the happy dataset.
 ```{r,eval=FALSE}
 happy <- readRDS("HAPPY.rds")
 ```
 
-Let's convert all the names to lowercase - it is easier to work with. Type in: 
-
+Now we change the column names to lowercase to make working with the dataset easier.
 ```{r,eval=FALSE}
 names(happy) = tolower(names(happy))
 ```
 
-Now it's important to understand what each column stands for. You can find a codebook with explanations for each of the variables at https://gssdataexplorer.norc.org/
 
 ## Part one (cleaning)
 
@@ -53,34 +47,112 @@ Write a separate code chunk to manipulate each variable. Once all the data manip
 
 1. Data cleaning: the values "IAP", "DK" and "NA" all encode missing values. Replace all of these instances by the value `NA`. 
 ```{r}
-library("stringr")
+library(stringr)
+library(ggplot2)
+library(tidyverse)
 
-happy[happy=="IAP"] <- "NA"
-happy[happy=="DK"] <- "NA"
-happy[happy=="NA"] <- "NA"
+happy <- readRDS("HAPPY.rds")
+names(happy) = tolower(names(happy))
+
+happy = happy %>%
+  mutate_if(is.character, list(~na_if(., "IAP"))) %>%
+  mutate_if(is.character, list(~na_if(., "DK"))) %>%
+  mutate_if(is.character, list(~na_if(., "NA")))
 
 
 ```
 
-2. Check the type of the variable and cast into the right type (factor variable for categorical variables). For age, change "89 OR OLDER" to 89 and assume the variable should be numeric. (Hint: see `?as.character` and `?as.numeric`)
+
+2. 
 ```{r}
 happy$age[happy$age=="89 OR OLDER"] <- 89
 happy$age <- as.numeric(happy$age)
 str(happy$age)
 ```
 
-3. Bring all levels of factors into a sensible order. For marital you could e.g. order the levels according to average age. 
+3.
+We chose to arrange marital status by age to see the the trend of martial status throughout life. As age increases, the more likely to see divorce and widow among people.
 ```{r}
 library("tidyverse")
-happy2 = happy %>%
+happyMarital = happy %>%
   group_by(marital) %>% 
   summarise(avgAge = mean(age,na.rm = TRUE)) %>%
   arrange(avgAge)
 
-happy2
+happyMarital
 
 ```
+We chose to arrange male and female by average age to see the difference between sex and the rate of filling out the survey. Females averaged slightly older than males indicating that older males were less likely to fill out the survey.
+```{r}
+happySex = happy %>%
+  group_by(sex) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
 
+happySex
+```
+We choose to arrange happiness rating by year to see if there is a change by year. Since all three ratings are super close, there is not much change in happiness rating by change in years.
+```{r}
+happyHappy = happy %>%
+  group_by(happy) %>%
+  summarise(avgYear = mean(year,na.rm = TRUE)) %>%
+  arrange(avgYear)
+
+happyHappy
+```
+
+We chose to compare sex by higher education. There are more females than males that pursued higher education than males.
+```{r}
+happyDegree = happy %>%
+  select(sex,degree) %>%
+  group_by(sex) %>%
+  filter(degree %in% c("BACHELOR","GRADUATE","JUNIOR COLLEGE")) %>%
+  summarise(college = length(degree))
+
+
+happyDegree
+```
+We chose to see if having a strong republican polictical has a similar distribution for how they were feeling about their family income. Most republicans feel at or above average about their incomes.
+```{r}
+happyIncome = happy %>%
+  select(finrela,partyid) %>%
+  group_by(finrela) %>%
+  filter(partyid == "STRONG REPUBLICAN") %>%
+  summarise(republicanCount = length(partyid))
+
+
+happyIncome
+```
+We chose to compare health by average age to compare trends. The older the person, the more likely they were to rate their health as worse than younger counterparts.
+```{r}
+happyHealth = happy %>%
+  group_by(health) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happyHealth
+```
+We chose to compare party id and age to see trends. The older the person, the more likely they are to have strong views.
+```{r}
+happyPartyID = happy %>%
+  group_by(partyid) %>%
+  summarise(avgAge = mean(age,na.rm = TRUE)) %>%
+  arrange(avgAge)
+
+happyPartyID
+```
+We chose to compare political views for females. Females are less likely to be extreme in polictical views and are most likely to be moderate.
+```{r}
+happyPolViews = happy %>%
+  select(polviews,sex) %>%
+  group_by(polviews) %>%
+  filter(sex == "FEMALE") %>%
+  summarise(polViewsFemale = length(sex)) %>%
+  arrange(polViewsFemale)
+
+
+happyPolViews
+```
 
 ## Part two (exploration)
 
