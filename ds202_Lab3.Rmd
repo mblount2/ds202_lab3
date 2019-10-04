@@ -87,8 +87,43 @@ happy2
 *Happiness!*
 Use `ggplot2` to create the plots. Your exploration should make use all elements of the grammar of graphics: mappings (`color`, `fill`, and `size` at least), different `geom`s (4 at least), scales, coordinates (eg `coord_flip`), facet, and theme (eg setting axis labels and title). **The final plot doesn't need to include all these elements, but they should be part of your exploration**. For each investigation, create an appropriate visualization and write a paragraph to describe it.
 
-1. Investigate the distributions of 2 different variables. 
+1. Investigate the distributions of 2 different variables.
+
+```{r}
+str(happy)
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(happy, aes(x=age)) + geom_histogram(binwidth = 5) + ggtitle("Distribution of Age") + xlab("Age")+ ylab("Count") + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+```
+
+```{r}
+ggplot(drop_na(happy), aes(x = happy)) + geom_bar(aes(fill = sex), position = "dodge") + ggtitle("Level of Happiness by Sex") + xlab("Happiness") + ylab("Count")
+```
+
 2. Investigate the relationship between happiness and three other variables in the data.
+
+```{r}
+```
+
+
+```{r}
+ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = marital), position = 'fill') + ggtitle("Level Happiness by Marital Status") + xlab("Happiness") + ylab("Proportion")
+```
+
+```{r}
+ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = degree), position = 'fill') + ggtitle("Level of Happiness by Education") + xlab("Happiness") + ylab("Proportion")
+```
+
+
+```{r}
+ggplot(drop_na(happy), aes(x=happy)) + geom_bar(aes(fill = health), position = 'fill',) + ggtitle("Level of Happiness by Health") + xlab("Happiness") + ylab("Proportion")
+```
+
+
 3. What do you learn from the data set? Write one or two paragraphs to describe.
 
 Explore the dataset yourself, and then discuss and refine answers as a team.
